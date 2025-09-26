@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/your-username/my-node-app.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
@@ -17,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('my-node-app')
+                    def image = docker.build('my-node-app')
                 }
             }
         }
@@ -25,8 +19,18 @@ pipeline {
         stage('Run Container') {
             steps {
                 script {
-                    docker.image('my-node-app').run('-d -p 3000:3000')
+                    docker.image('my-node-app').run('-d -p 3000:3000 --name my-node-app-container')
                 }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                // Clean up any existing container with the same name
+                sh 'docker stop my-node-app-container || true'
+                sh 'docker rm my-node-app-container || true'
             }
         }
     }
