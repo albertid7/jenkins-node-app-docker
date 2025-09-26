@@ -4,7 +4,12 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                script {
+                    // Use Docker to run npm install with Node.js
+                    docker.image('node:18-alpine').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        sh 'npm install'
+                    }
+                }
             }
         }
 
